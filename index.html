@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Webview Test</title>
+	<meta charset=utf-8>
+	<meta http-equiv=X-UA-Compatible content="IE=edge">
+	<meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+	<style media=all type=text/css>
+		body {
+			width: 100vw;
+			height: 100vh;
+		}
+		
+		h1 {
+			color: gray;
+		}
+
+		#requested-data {
+			color: darkblue;
+			font-style: italic;
+		}
+	</style>
+</head>
+<body>
+<h1>Webview Test</h1>
+<div id="requested-data"></div>
+
+<script>
+	window.addEventListener('load', () => {
+		const container = document.getElementById('requested-data');
+		const request = new XMLHttpRequest();
+
+		request.open('GET', 'url');
+
+		request.responseType = 'text';
+
+		request.onload = function() {
+			container.innerHTML = request.response;
+		};
+
+		request.send();
+	});
+</script>
+</body>
+</html>
