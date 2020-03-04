@@ -25,9 +25,24 @@
 <h1>Webview Test</h1>
 <div id="requested-data"></div>
 <a href="./test.html" target="_self">Test redirect</a>
+<button id="test-redirect-button">Go to test page</button>
+<button id="test-redirect-button-blank">Go to test page with _blank</button>
 
 <script>
 	window.addEventListener('load', () => {
+		const btn = document.getElementById('test-redirect-button');
+		const btnBlank = document.getElementById('test-redirect-button-blank');
+
+		btn.addEventListener('click', () => {
+			const windowReference = window.open('./test.html', 'vsignWindow');
+			windowReference.focus();
+		})
+
+		btnBlank.addEventListener('click', () => {
+			const windowReference = window.open('./test.html', '_blank');
+			windowReference.focus();
+		})
+
 		// const container = document.getElementById('requested-data');
 		// const request = new XMLHttpRequest();
 
