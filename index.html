@@ -6,57 +6,94 @@
 	<meta http-equiv=X-UA-Compatible content="IE=edge">
 	<meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
 	<style media=all type=text/css>
-		body {
-			width: 100vw;
-			height: 100vh;
-		}
-		
-		h1 {
-			color: gray;
+		html, body {
+			margin: 0;
+			padding: 0;
+			min-height: 100vh;
 		}
 
-		#requested-data {
-			color: darkblue;
-			font-style: italic;
+		body.is-flexible {
+			display: flex;
+			flex-direction: column;
+		}
+		
+		h2 {
+			color: white;
+		}
+		
+		nav {
+			position: sticky;
+			flex-shrink: 0;
+			top: 0;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			padding: 8px;
+			background-color: gray;
+			box-sizing: border-box;
+			box-shadow: 0 4px 10px -2px gray;;
+		}
+
+		input {
+			margin: 0 8px;
+		}
+
+		button {
+			background-color: lightgray;
+		}
+
+		iframe {
+			width: 100%;
+			height: 700px;
+		}
+
+		main {
+			flex: 1 1 auto;
 		}
 	</style>
 </head>
 <body>
-<h1>Webview Test</h1>
-<div id="requested-data"></div>
-<a href="./test.html" target="_self">Test redirect</a>
-<button id="test-redirect-button">Go to test page</button>
-<button id="test-redirect-button-blank">Go to test page with _blank</button>
-
-<input type="date" placeholder="mm/dd/yyyy" />
-
+	<nav>
+		<input id="iframe-input" type="text" placeholder="paste a link" />
+		<button id="iframe-button">Show</button>
+		<input id="iframe-checkbox" type="checkbox">
+		<label for="iframe-checkbox">Flexible height</label>
+	</nav>
+	<main>
+		<iframe id="iframe"></iframe>
+	</main>
 <script>
-	window.addEventListener('load', () => {
-		const btn = document.getElementById('test-redirect-button');
-		const btnBlank = document.getElementById('test-redirect-button-blank');
+	const button = document.getElementById('iframe-button');
+	const input = document.getElementById('iframe-input');
+	const iframe = document.getElementById('iframe');
+	const iframeContainer = iframe.parentElement;
+	const checkBox = document.getElementById('iframe-checkbox');
 
-		btn.addEventListener('click', () => {
-			const windowReference = window.open('./test.html', 'vsignWindow');
-			windowReference.focus();
-		})
+	button.addEventListener('click', () => {
+		if (input.value) {
+			iframe.src = input.value;
+		}
+	});
 
-		btnBlank.addEventListener('click', () => {
-			const windowReference = window.open('./test.html', '_blank');
-			windowReference.focus();
-		})
+	let resizeSubscr;
 
-		// const container = document.getElementById('requested-data');
-		// const request = new XMLHttpRequest();
+	checkBox.addEventListener('change', (event) => {
+		if (event.target.checked) {
+			iframe.style.height = '0px';
+			document.body.classList.add('is-flexible');
 
-		// request.open('GET', 'url');
+			iframe.style.height = iframeContainer.getBoundingClientRect().height - 8 + 'px';
 
-		// request.responseType = 'text';
+			iframeContainer.addEventListener('resize', () => {
+				iframe.style.height = '0px';
+				iframe.style.height = iframeContainer.getBoundingClientRect().height - 8 + 'px';
+			})
+		} else {
+			iframeContainer.removeEventListener('resize', resizeSubscr);
 
-		// request.onload = function() {
-		// 	container.innerHTML = request.response;
-		// };
-
-		// request.send();
+			document.body.classList.remove('is-flexible');
+			iframe.style.height = '700px';
+		}
 	});
 </script>
 </body>
