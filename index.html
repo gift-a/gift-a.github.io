@@ -94,11 +94,13 @@
 			document.body.classList.add('is-flexible');
 
 			iframe.style.height = iframeContainer.getBoundingClientRect().height - 8 + 'px';
+			iframe.style.width = iframeContainer.getBoundingClientRect().width + 'px';
 
 			iframeContainer.addEventListener('resize', () => {
 				console.log('resize');
 				iframe.style.height = '0px';
 				iframe.style.height = iframeContainer.getBoundingClientRect().height - 8 + 'px';
+				iframe.style.width = iframeContainer.getBoundingClientRect().width + 'px';
 			})
 		} else {
 			iframeContainer.removeEventListener('resize', resizeSubscr);
