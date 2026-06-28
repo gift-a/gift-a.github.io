@@ -1,0 +1,86 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for comparison
+      
+      - name: Install Claude Code
+        run: |
+          curl -fsSL https://install.claude.ai/cli | sh
+          echo "$HOME/.claude/bin" >> $GITHUB_PATH
+      
+      - name: Install jq
+        run: sudo apt-get install -y jq
+      
+      - name: Run Claude Code Review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          ./scripts/ci-review.sh ${{ github.event.pull_request.number }}
+      
+      - name: Check Approval
+        run: |
+          ./scripts/check-approval.sh review-results.json
+      
+      - name: Upload Review Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-results
+          path: review-results.json
+      
+      - name: Comment on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const review = JSON.parse(fs.readFileSync('review-results.json', 'utf8'));
+            
+            const critical = review.findings.filter(f => f.severity === 'critical').length;
+            const high = review.findings.filter(f => f.severity === 'high').length;
+            const medium = review.findings.filter(f => f.severity === 'medium').length;
+            
+            let emoji = '✅';
+            let status = 'Approved';
+            if (critical > 0 || high > 0) {
+              emoji = '❌';
+              status = 'Blocked';
+            } else if (medium > 0) {
+              emoji = '⚠️';
+              status = 'Approved with warnings';
+            }
+            
+            const body = `## ${emoji} Claude Code Review: ${status}
+            
+            ${review.summary}
+            
+            ### Findings Summary
+            - Critical: ${critical}
+            - High: ${high}
+            - Medium: ${medium}
+            - Low: ${review.findings.filter(f => f.severity === 'low').length}
+            
+            ${review.findings.length > 0 ? '### Details\n' + review.findings.map(f => 
+              `- **[${f.severity.toUpperCase()}]** \`${f.file}${f.line ? ':' + f.line : ''}\`: ${f.message}`
+            ).join('\n') : ''}
+            
+            ---
+            *Reviewed by Claude Code*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
