@@ -36,7 +36,14 @@ log "Starting review of PR #${PR_NUMBER}"
 
 # Get changed files
 log "Identifying changed files..."
-CHANGED_FILES=$(git diff --name-only master...HEAD | grep -E '\.(ts|tsx)$' || true)
+# In GitHub Actions, we need to fetch the base branch and use origin/master
+if [ -n "${GITHUB_ACTIONS:-}" ]; then
+  git fetch origin master:master 2>/dev/null || true
+  BASE_REF="origin/master"
+else
+  BASE_REF="master"
+fi
+CHANGED_FILES=$(git diff --name-only ${BASE_REF}...HEAD | grep -E '\.(ts|tsx)$' || true)
 
 if [ -z "$CHANGED_FILES" ]; then
   log "No TypeScript files changed. Skipping review."
