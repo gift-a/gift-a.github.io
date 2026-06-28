@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["summary", "findings", "approved"],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "Brief summary of the review"
+    },
+    "approved": {
+      "type": "boolean",
+      "description": "Whether the PR should be approved"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "file", "message", "category"],
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low", "info"],
+            "description": "Issue severity level"
+          },
+          "file": {
+            "type": "string",
+            "description": "File path where issue was found"
+          },
+          "line": {
+            "type": "number",
+            "nullable": true,
+            "description": "Line number (if applicable)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Detailed description of the issue"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["security", "performance", "bug", "style", "breaking-change", "test", "other"],
+            "description": "Issue category"
+          },
+          "suggestedFix": {
+            "type": "string",
+            "description": "Optional suggestion for fixing the issue"
+          }
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "filesReviewed": { "type": "number" },
+        "criticalIssues": { "type": "number" },
+        "highIssues": { "type": "number" },
+        "mediumIssues": { "type": "number" },
+        "lowIssues": { "type": "number" }
+      }
+    }
+  }
+}
